@@ -188,12 +188,17 @@ def obtener_tupla(msg: str):
     return [tuple(x.strip(' ()').split(',')) for x in prop.split(', ')] if len(prop) > 0 and prop.strip()[0] != '#' else []
 
 
+def obtener_tupla_doble(msg: str):
+    prop = input(msg)
+    return [tuple(a.split(',')) for x in prop.split(', ') if (a := x.strip(' ()'))[0] != '¬'], [tuple(a.strip(' ()¬').split(',')) for x in prop.split(', ') if (a := x.strip(' ()'))[0] == '¬'] if len(prop) > 0 and prop.strip()[0] != '#' else []
+
+
 REGLAS = []
 
 nombre = input("Introduce el nombre de la regla: ")
 while (len(nombre) > 0 and nombre.strip()[0] != '#'):
-    consecuente = obtener_tupla("Introduce el consecuente: ")
-    no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
+    consecuente, no_consecuente = obtener_tupla_doble("Introduce el consecuente: ")
+    # no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
     eliminar = obtener_tupla("Introduce la lista eliminar: ")
     anadir = obtener_tupla("Introduce la lista añadir: ")
     REGLAS.append(Regla(nombre, consecuente, anadir, eliminar, no_consecuente))
