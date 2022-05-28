@@ -5,14 +5,14 @@ Resuelve los ejercicios de sistemas de producciones de IASI.
   - Introduce el nombre
   - Introduce la lista de consecuentes
   - Introduce la lista de tuplas que añadir
-  - Introduce la lista de tuplas que eliminar
-
+  - Introduce la lista de tuplas que eliminar 
   - Para no introducir un campo simplemente pulsar enter sin introducir nada
   - Para terminar de escribir las reglas inserta una regla con nombre vacio
 - Introduce la lista con las tuplas de la base de hechos
 - Introduce la tupla a buscar
-  - Si no introduces ninguna puedes introducir el número máximo de ciclos a realizar   
--
+  - Si no introduces ninguna puedes introducir el número máximo de ciclos a realizar
+<a/>
+
 - Los elementos de las tuplas van separados con comas 
   ```A,B,C```
 - Las variables van precedidas de dollar ```$x```
@@ -20,6 +20,7 @@ Resuelve los ejercicios de sistemas de producciones de IASI.
 - Para añadir terminos que no tienen que aparecer en el consecuente preceder con negación (¬) ```(A,B,C), ¬(C,$x,A)```
 
 ## Ejemplo
+Puedes copiar todo el ejemplo y pegarlo en consola, no es necesario copiar linea a linea  
 _Se corresponde con el ejercicio  5 del examen de junio de 2019_
 ```
 R1		# Regla 1
@@ -42,5 +43,29 @@ R4		# Regla 4
 (A,A,A), (B,B,B)# Base de hechos
 		# Hecho a demostrar
 5		# Número máximo de ciclos
+
+```
+
+_Ejercicio 5 de mayo de 2019_
+```
+R1
+($x,$y,B), ($y,C,B) 
+
+($y,A,$x)
+R2
+(A,B,$x)
+(A,B,$x)
+
+R3
+(A,$x,B), ¬(A,B,$x) 
+
+(A,B,$x), ($x,$x,B)
+R4 
+($x,$y,$x) 
+
+($x,$x,$y)
+
+(A,C,B)
+(C,C,A)
 
 ```
