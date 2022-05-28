@@ -183,37 +183,48 @@ c.mesa_trabajo.add(('A', 'C', 'B'))
 '''
 
 
-def obtener_tupla(msg: str):
+def __obtener_tupla(msg: str):
     prop = input(msg)
-    return [tuple(x.strip(' ()').split(',')) for x in prop.split(', ')] if len(prop) > 0 and prop.strip()[0] != '#' else []
+    prop = prop[:prop.find('#')].strip()
+    return prop.replace(' ^', ', ').split(', ') if len(prop) > 0 else []
+
+
+def __input(msg: str):
+    prop = input(msg)
+    return prop[:prop.find('#')].strip()
+
+
+def obtener_tupla(msg: str):
+    return [tuple(x.strip(' ()').split(',')) for x in __obtener_tupla(msg)]
 
 
 def obtener_tupla_doble(msg: str):
-    prop = input(msg)
-    return [tuple(a.split(',')) for x in prop.split(', ') if (a := x.strip(' ()'))[0] != '¬'], [tuple(a.strip(' ()¬').split(',')) for x in prop.split(', ') if (a := x.strip(' ()'))[0] == '¬'] if len(prop) > 0 and prop.strip()[0] != '#' else []
+    prop = __obtener_tupla(msg)
+    return [tuple(a.split(',')) for x in prop if (a := x.strip(' ()'))[0] != '¬'], [tuple(a.strip(' ()¬').split(',')) for x in prop if (a := x.strip(' ()'))[0] == '¬']
 
 
 REGLAS = []
 
-nombre = input("Introduce el nombre de la regla: ")
+nombre = __input("Introduce el nombre de la regla: ")
 while (len(nombre) > 0 and nombre.strip()[0] != '#'):
     consecuente, no_consecuente = obtener_tupla_doble("Introduce el consecuente: ")
     # no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
     eliminar = obtener_tupla("Introduce la lista eliminar: ")
     anadir = obtener_tupla("Introduce la lista añadir: ")
     REGLAS.append(Regla(nombre, consecuente, anadir, eliminar, no_consecuente))
-    nombre = input("\nIntroduce el nombre de la regla: ")
+    nombre = __input("\nIntroduce el nombre de la regla: ")
 
 [print(i.print_ext()) for i in REGLAS]
 
 c = Ciclo()
 c.mesa_trabajo.update(obtener_tupla('Introduce la base de hechos: '))
 
-tupla_a_comprobar = tuple(a.split(',') if len((a := input('Introduce la tupla a buscar: ').strip(' ()'))) > 0 else [])
+tupla_a_comprobar = tuple(a.split(',') if (a := __input('Introduce la tupla a buscar: ')) else [])
+
 
 ciclo_maximo = None
 if len(tupla_a_comprobar) == 0:
-    ciclo_maximo = int(input("Indica el ciclo máximo: "))
+    ciclo_maximo = int(__input("Indica el ciclo máximo: "))
 
 i = 0
 while c is not None and (ciclo_maximo is None or i <= ciclo_maximo):
