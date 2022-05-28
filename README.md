@@ -20,7 +20,7 @@ Resuelve los ejercicios de sistemas de producciones de IASI.
 - Para añadir terminos que no tienen que aparecer en el consecuente preceder con negación (¬) ```(A,B,C), ¬(C,$x,A)```
 
 ## Ejemplo
-_Se corresponde con el ejercicio  5 del examen de junio de 2019
+_Se corresponde con el ejercicio  5 del examen de junio de 2019_
 ```
 R1		# Regla 1
 (A,$x,D), ($y,$y,$y) 	# Consecuente
