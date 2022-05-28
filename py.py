@@ -185,13 +185,13 @@ c.mesa_trabajo.add(('A', 'C', 'B'))
 
 def __obtener_tupla(msg: str):
     prop = input(msg)
-    prop = prop[:prop.find('#')].strip()
+    prop = (prop[:a] if (a := prop.find('#')) != -1 else prop).strip()
     return prop.replace(' ^', ', ').split(', ') if len(prop) > 0 else []
 
 
 def __input(msg: str):
     prop = input(msg)
-    return prop[:prop.find('#')].strip()
+    return (prop[:a] if (a := prop.find('#')) != -1 else prop).strip()
 
 
 def obtener_tupla(msg: str):
@@ -206,7 +206,7 @@ def obtener_tupla_doble(msg: str):
 REGLAS = []
 
 nombre = __input("Introduce el nombre de la regla: ")
-while (len(nombre) > 0 and nombre.strip()[0] != '#'):
+while (len(nombre) > 0):
     consecuente, no_consecuente = obtener_tupla_doble("Introduce el consecuente: ")
     # no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
     eliminar = obtener_tupla("Introduce la lista eliminar: ")
@@ -219,7 +219,7 @@ while (len(nombre) > 0 and nombre.strip()[0] != '#'):
 c = Ciclo()
 c.mesa_trabajo.update(obtener_tupla('Introduce la base de hechos: '))
 
-tupla_a_comprobar = tuple(a.split(',') if (a := __input('Introduce la tupla a buscar: ')) else [])
+tupla_a_comprobar = tuple(a.strip(' ()').split(',') if (a := __input('Introduce la tupla a buscar: ')) else [])
 
 
 ciclo_maximo = None
@@ -249,5 +249,5 @@ while c is not None and (ciclo_maximo is None or i <= ciclo_maximo):
     c = nc
 if c is None:
     print("No se pueden aplicar mas reglas")
-elif i > ciclo_maximo:
+elif ciclo_maximo is not None and i > ciclo_maximo:
     print("Se ha llegado al ciclo máximo")
