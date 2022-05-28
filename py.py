@@ -11,7 +11,7 @@ class Ciclo:
         self.conjunto_conflicto = []
         self.regla_aplicada = None
 
-    def comprobar_usada(self, regla):
+    def comprobar_refraccion(self, regla):
         i: Ciclo = self.anterior
         while(i is not None):
             if regla in i.conjunto_conflicto:
@@ -21,7 +21,9 @@ class Ciclo:
                     i = i.anterior
             else:
                 break
+        return True
 
+    def comprobar_ciclo(self, regla):
         i: Ciclo = self.anterior
         while(i is not None):
             if i.regla_aplicada == regla:
@@ -64,14 +66,24 @@ class Ciclo:
 
     def generar_siguiente(self):
         for regla in self.conjunto_conflicto:
-            if self.comprobar_usada(regla):
-                self.regla_aplicada = regla
-                nuevo_ciclo = Ciclo()
-                nuevo_ciclo.mesa_trabajo.update(self.mesa_trabajo)
-                nuevo_ciclo.mesa_trabajo.update(regla.anadir)
-                nuevo_ciclo.mesa_trabajo.difference_update(regla.eliminar)
-                nuevo_ciclo.anterior = self
-                return nuevo_ciclo
+            if self.comprobar_refraccion(regla) and self.comprobar_ciclo(regla):
+                regla_a_usar = regla
+                break
+        else:
+            for regla in self.conjunto_conflicto:
+                if self.comprobar_ciclo(regla):
+                    regla_a_usar = regla
+                    break
+            else:
+                return None
+
+        self.regla_aplicada = regla_a_usar
+        nuevo_ciclo = Ciclo()
+        nuevo_ciclo.mesa_trabajo.update(self.mesa_trabajo)
+        nuevo_ciclo.mesa_trabajo.update(regla_a_usar.anadir)
+        nuevo_ciclo.mesa_trabajo.difference_update(regla_a_usar.eliminar)
+        nuevo_ciclo.anterior = self
+        return nuevo_ciclo
 
     def permutations(self, list_cartesian: list[list[tuple]], current_iteration, progress: dict) -> list[dict]:
         done = []
@@ -182,8 +194,8 @@ nombre = input("Introduce el nombre de la regla: ")
 while (len(nombre) > 0 and nombre.strip()[0] != '#'):
     consecuente = obtener_tupla("Introduce el consecuente: ")
     no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
-    anadir = obtener_tupla("Introduce la lista añadir: ")
     eliminar = obtener_tupla("Introduce la lista eliminar: ")
+    anadir = obtener_tupla("Introduce la lista añadir: ")
     REGLAS.append(Regla(nombre, consecuente, anadir, eliminar, no_consecuente))
     nombre = input("\nIntroduce el nombre de la regla: ")
 
@@ -192,11 +204,14 @@ while (len(nombre) > 0 and nombre.strip()[0] != '#'):
 c = Ciclo()
 c.mesa_trabajo.update(obtener_tupla('Introduce la base de hechos: '))
 
-tupla_a_comprobar = tuple(input('Introduce la tupla a buscar: ').strip(' ()').split(','))
+tupla_a_comprobar = tuple(a.split(',') if len((a := input('Introduce la tupla a buscar: ').strip(' ()'))) > 0 else [])
 
+ciclo_maximo = None
+if len(tupla_a_comprobar) == 0:
+    ciclo_maximo = int(input("Indica el ciclo máximo: "))
 
 i = 0
-while c is not None:
+while c is not None and (ciclo_maximo is None or i <= ciclo_maximo):
     print("Ciclo", i)
     i += 1
 
@@ -216,5 +231,7 @@ while c is not None:
     print(c.regla_aplicada)
     print()
     c = nc
-else:
+if c is None:
     print("No se pueden aplicar mas reglas")
+elif i > ciclo_maximo:
+    print("Se ha llegado al ciclo máximo")
