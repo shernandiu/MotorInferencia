@@ -1,6 +1,3 @@
-from ast import Pass
-from itertools import permutations
-from mimetypes import init
 import re
 
 
@@ -45,7 +42,7 @@ class Ciclo:
                 list_cartesian: list[list] = []
                 for regex in list_of_regex:
                     list_cartesian.append([])
-                    for character in ('A', 'B', 'C'):
+                    for character in LETRAS_PRESENTES:
                         list_cartesian[-1].append((regex, character))
 
                 list_of_dicts: list[dict] = self.permutations(list_cartesian, 0, {})
@@ -168,19 +165,8 @@ class Regla:
             salida += str(lista_atrib[-1])+' '
         return salida
 
-
-'''
-regla1 = Regla('R1', [('$x', '$y', 'B'), ('$y', 'C', 'B')], [('$y', 'A', '$x')])
-regla2 = Regla('R2', [('A', 'B', '$x')], [], [('A', 'B', '$x')])
-regla3 = Regla('R3', [('A', '$x', 'B')], [('A', 'B', '$x'), ('$x', '$x', 'B')], [], [('A', 'B', '$x')])
-regla4 = Regla('R4', [('$x', '$y', '$x')], [('$x', '$x', '$y')])
-
-REGLAS = (regla1, regla2, regla3, regla4)
-
-
-c = Ciclo()
-c.mesa_trabajo.add(('A', 'C', 'B'))
-'''
+    def propiedades(self) -> set:
+        return set().union(*self.consecuente, *self.no_consecuente, *self.anadir, *self.eliminar)
 
 
 def __obtener_tupla(msg: str):
@@ -204,7 +190,7 @@ def obtener_tupla_doble(msg: str):
 
 
 REGLAS = []
-
+LETRAS_PRESENTES = []
 nombre = __input("Introduce el nombre de la regla: ")
 while (len(nombre) > 0):
     consecuente, no_consecuente = obtener_tupla_doble("Introduce el consecuente: ")
@@ -219,12 +205,16 @@ while (len(nombre) > 0):
 c = Ciclo()
 c.mesa_trabajo.update(obtener_tupla('Introduce la base de hechos: '))
 
+
 tupla_a_comprobar = tuple(a.strip(' ()').split(',') if (a := __input('Introduce la tupla a buscar: ')) else [])
 
 
 ciclo_maximo = None
 if len(tupla_a_comprobar) == 0:
     ciclo_maximo = int(__input("Indica el ciclo máximo: "))
+
+[LETRAS_PRESENTES.append(i) for i in set().union(*[x.propiedades() for x in REGLAS], *c.mesa_trabajo) if i[0] != '$']
+LETRAS_PRESENTES.sort()
 
 i = 0
 while c is not None and (ciclo_maximo is None or i <= ciclo_maximo):
