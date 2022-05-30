@@ -38,6 +38,9 @@ class Ciclo:
             for consecuente in regla.consecuente:
                 list_of_regex.update(filter(r.match, consecuente))
 
+            for consecuente in regla.no_consecuente:
+                list_of_regex.update(filter(r.match, consecuente))
+
             if len(list_of_regex) > 0:
                 list_cartesian: list[list] = []
                 for regex in list_of_regex:
