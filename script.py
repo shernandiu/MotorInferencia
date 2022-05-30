@@ -105,7 +105,7 @@ class Regla:
         return Regla(self.nombre, *nuevas_props, subtituciones)
 
     def __str__(self) -> str:
-        return self.nombre + str(self.replaces)
+        return self.nombre + str(self.replaces).replace('\'', '')
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Regla):
@@ -143,7 +143,7 @@ class Regla:
             for i in lista_atrib[:-1]:
                 salida += str(i)+' ^ '
             salida += str(lista_atrib[-1])+' '
-        return salida
+        return salida.replace('\'', '')
 
     def propiedades(self) -> set:
         return set().union(*self.consecuente, *self.no_consecuente, *self.anadir, *self.eliminar)
@@ -244,7 +244,7 @@ while c is not None and (ciclo_maximo is None or i <= ciclo_maximo):
     i += 1
 
     print("MT:")
-    [print(i, end='  ') for i in c.mesa_trabajo]
+    [print(str(i).replace('\'', ''), end='  ') for i in c.mesa_trabajo]
     print()
 
     c.calcular_cc()
