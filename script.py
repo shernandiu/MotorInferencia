@@ -172,7 +172,7 @@ class Regla:
 def __obtener_tupla(msg: str):
     prop = input(msg)
     prop = (prop[:a] if (a := prop.find('#')) != -1 else prop).strip()
-    return prop.replace(' ^', ', ').split(', ') if len(prop) > 0 else []
+    return prop.replace(' y ', ';').replace('^', ';').replace(', ', ';').split(';') if len(prop) > 0 else []
 
 
 def __input(msg: str):
