@@ -30,39 +30,16 @@ class Ciclo:
         return True
 
     def calcular_cc(self):
-        reglas_aplicables = []
-        r = re.compile('\$.')
+        [self.conjunto_conflicto.append(i) for i in Regla.get_reglas() if self.comprobar_consecuente(i)]
 
-        for regla in REGLAS:
-            list_of_regex = set()
-            for consecuente in regla.consecuente:
-                list_of_regex.update(filter(r.match, consecuente))
-
-            for consecuente in regla.no_consecuente:
-                list_of_regex.update(filter(r.match, consecuente))
-
-            if len(list_of_regex) > 0:
-                list_cartesian: list[list] = []
-                for regex in list_of_regex:
-                    list_cartesian.append([])
-                    for character in LETRAS_PRESENTES:
-                        list_cartesian[-1].append((regex, character))
-
-                list_of_dicts: list[dict] = self.permutations(list_cartesian, 0, {})
-                [reglas_aplicables.append(i) for i in [regla.sustituir(j) for j in list_of_dicts]]
-            else:
-                reglas_aplicables.append(regla)
-
-        [self.comprobar_consecuente(i) for i in reglas_aplicables]
-
-    def comprobar_consecuente(self, regla):
+    def comprobar_consecuente(self, regla) -> bool:
         for consecuente in regla.consecuente:
             if consecuente not in self.mesa_trabajo:
-                return
+                return False
         for no_consecuente in regla.no_consecuente:
             if no_consecuente in self.mesa_trabajo:
-                return
-        self.conjunto_conflicto.append(regla)
+                return False
+        return True
 
     def generar_siguiente(self):
         for regla in self.conjunto_conflicto:
@@ -85,21 +62,21 @@ class Ciclo:
         nuevo_ciclo.anterior = self
         return nuevo_ciclo
 
-    def permutations(self, list_cartesian: list, current_iteration, progress: dict) -> list:
-        done = []
-        if current_iteration < len(list_cartesian):
-            for i in list_cartesian[current_iteration]:
-                new_dict = progress.copy()
-                new_dict[i[0]] = i[1]
-                done.extend(self.permutations(list_cartesian, current_iteration+1, new_dict))
-        else:
-            done.append(progress)
-
-        return done
-
 
 class Regla:
+    __lista_reglas = None
+    lista_reglas_con_variables = []
+
     def __init__(self, *args) -> None:
+        """
+        Constructor de regla
+        args: Parámetros de la regla
+        0 - Nombre
+        1 - Consecuente
+        2 - Lista añadir
+        3 - Lista eliminar
+        4 - Consecuente negado
+        """
         self.consecuente = set()
         self.no_consecuente = set()
         self.anadir = set()
@@ -114,7 +91,7 @@ class Regla:
             [self.no_consecuente.add(i) for i in args[4]]
             self.replaces = args[5]
         except IndexError:
-            pass
+            Regla.lista_reglas_con_variables.append(self)
 
     def sustituir(self, subtituciones: dict):
         propiedades = [self.consecuente, self.anadir, self.eliminar, self.no_consecuente]
@@ -171,6 +148,49 @@ class Regla:
     def propiedades(self) -> set:
         return set().union(*self.consecuente, *self.no_consecuente, *self.anadir, *self.eliminar)
 
+    @classmethod
+    def get_reglas(self) -> list:
+        if Regla.__lista_reglas is not None:
+            return Regla.__lista_reglas
+
+        r = re.compile('\$.')
+        Regla.__lista_reglas = []
+
+        for regla in Regla.lista_reglas_con_variables:
+            list_of_regex = set()
+            for consecuente in regla.consecuente:
+                list_of_regex.update(filter(r.match, consecuente))
+
+            for consecuente in regla.no_consecuente:
+                list_of_regex.update(filter(r.match, consecuente))
+
+            if len(list_of_regex) > 0:
+                list_cartesian: list[list] = []
+                for regex in list_of_regex:
+                    list_cartesian.append([])
+                    for character in LETRAS_PRESENTES:
+                        list_cartesian[-1].append((regex, character))
+
+                list_of_dicts: list[dict] = Regla.permutations(list_cartesian, 0, {})
+                [Regla.__lista_reglas.append(i) for i in [regla.sustituir(j) for j in list_of_dicts]]
+            else:
+                Regla.__lista_reglas.append(regla)
+
+        return Regla.__lista_reglas
+
+    @classmethod
+    def permutations(self, list_cartesian: list, current_iteration, progress: dict) -> list:
+        done = []
+        if current_iteration < len(list_cartesian):
+            for i in list_cartesian[current_iteration]:
+                new_dict = progress.copy()
+                new_dict[i[0]] = i[1]
+                done.extend(self.permutations(list_cartesian, current_iteration+1, new_dict))
+        else:
+            done.append(progress)
+
+        return done
+
 
 def __obtener_tupla(msg: str):
     prop = input(msg)
@@ -192,7 +212,6 @@ def obtener_tupla_doble(msg: str):
     return [tuple(a.split(',')) for x in prop if (a := x.strip(' ()'))[0] != '¬'], [tuple(a.strip(' ()¬').split(',')) for x in prop if (a := x.strip(' ()'))[0] == '¬']
 
 
-REGLAS = []
 LETRAS_PRESENTES = []
 nombre = __input("Introduce el nombre de la regla: ")
 while (len(nombre) > 0):
@@ -200,10 +219,10 @@ while (len(nombre) > 0):
     # no_consecuente = obtener_tupla("Introduce el consecuente negado: ")
     eliminar = obtener_tupla("Introduce la lista eliminar: ")
     anadir = obtener_tupla("Introduce la lista añadir: ")
-    REGLAS.append(Regla(nombre, consecuente, anadir, eliminar, no_consecuente))
+    Regla(nombre, consecuente, anadir, eliminar, no_consecuente)
     nombre = __input("\nIntroduce el nombre de la regla: ")
 
-[print(i.print_ext()) for i in REGLAS]
+[print(i.print_ext()) for i in Regla.lista_reglas_con_variables]
 
 c = Ciclo()
 c.mesa_trabajo.update(obtener_tupla('Introduce la base de hechos: '))
@@ -216,7 +235,7 @@ ciclo_maximo = None
 if len(tupla_a_comprobar) == 0:
     ciclo_maximo = int(__input("Indica el ciclo máximo: "))
 
-[LETRAS_PRESENTES.append(i) for i in set().union(*[x.propiedades() for x in REGLAS], *c.mesa_trabajo) if i[0] != '$']
+[LETRAS_PRESENTES.append(i) for i in set().union(*[x.propiedades() for x in Regla.lista_reglas_con_variables], *c.mesa_trabajo) if i[0] != '$']
 LETRAS_PRESENTES.sort()
 
 i = 0
