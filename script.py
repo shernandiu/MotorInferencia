@@ -85,7 +85,7 @@ class Ciclo:
         nuevo_ciclo.anterior = self
         return nuevo_ciclo
 
-    def permutations(self, list_cartesian: list[list[tuple]], current_iteration, progress: dict) -> list[dict]:
+    def permutations(self, list_cartesian: list, current_iteration, progress: dict) -> list:
         done = []
         if current_iteration < len(list_cartesian):
             for i in list_cartesian[current_iteration]:
